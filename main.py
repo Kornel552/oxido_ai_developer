@@ -10,14 +10,14 @@ with open("text_file.txt", "r", encoding="utf-8") as file:
 
 prompt = (
     "Przekształć poniższy artykuł na kod HTML, używając odpowiednich tagów do strukturyzacji treści. "
-    "Wskaż miejsca, w których warto dodać grafiki, wstawiając tag <img> z atrybutem src=\"image_placeholder.jpg\" "
-    "oraz dodaj atrybut alt z odpowiednim opisem obrazka. Umieść podpisy pod grafikami. "
-    "Zwrócony kod powinien zawierać wyłącznie zawartość do wstawienia pomiędzy tagami <body> i </body>."
-    "Oto treść artykułu: " + file_content
+    "Nie dodawaj znaczników formatowania. Wskaż miejsca, w których warto dodać grafiki, wstawiając tag <img> z "
+    "atrybutem src=\"image_placeholder.jpg\" oraz dodaj atrybut alt z odpowiednim opisem obrazka. "
+    "Umieść podpisy pod grafikami. Zwrócony kod powinien zawierać wyłącznie zawartość do wstawienia "
+    "pomiędzy tagami <body> i </body>. Oto treść artykułu: " + file_content
 )
 
 response = openai.ChatCompletion.create(
-    model="gpt-4",
+    model="gpt-4o",
     messages=[
         {"role": "system", "content": "You are a helpful assistant that generates raw HTML code without markdown or "
                                       "other formatting markers."},
@@ -32,4 +32,5 @@ html_content = response.choices[0].message["content"]
 with open("artykul.html", "w", encoding="utf-8") as html_file:
     html_file.write(html_content)
 
-print("finished")
+print("article completed")
+
