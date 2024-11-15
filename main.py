@@ -2,39 +2,68 @@ from dotenv import load_dotenv
 import openai
 import os
 
-load_dotenv()
-openai.api_key = os.getenv("API_KEY")
 
-with open("text_file.txt", "r", encoding="utf-8") as file:
-    file_content = file.read()
+def main():
+    load_dotenv()
+    api_key = os.getenv("API_KEY")
+    if not api_key:
+        raise ValueError("API_KEY not found. Please set it in your .env file.")
+    openai.api_key = api_key
 
-prompt = (
-    "Przekształć poniższy artykuł na kod HTML, używając odpowiednich tagów do strukturyzacji treści. "
-    "Nie dodawaj znaczników formatowania. Wskaż miejsca, w których warto dodać grafiki, wstawiając tag <img> z "
-    "atrybutem src=\"image_placeholder.jpg\" oraz dodaj atrybut alt z odpowiednim opisem obrazka. "
-    "Umieść podpisy pod grafikami. Zwrócony kod powinien zawierać wyłącznie zawartość do wstawienia "
-    "pomiędzy tagami <body> i </body>. Oto treść artykułu: " + file_content
-)
+    file_content = read_file("text_file.txt")
 
-response = openai.ChatCompletion.create(
-    model="gpt-4o",
-    messages=[
-        {"role": "system", "content": "You are a helpful assistant that generates raw HTML code without markdown or "
-                                      "other formatting markers."},
-        {"role": "user", "content": prompt}
-    ],
-    temperature=0.7,
-    max_tokens=1500,
-)
+    prompt = (
+        "Przekształć poniższy artykuł na kod HTML, używając odpowiednich tagów do strukturyzacji treści. "
+        "Nie dodawaj znaczników formatowania. Wskaż miejsca, w których warto dodać grafiki, wstawiając tag <img> z "
+        "atrybutem src=\"image_placeholder.jpg\" oraz dodaj atrybut alt z odpowiednim opisem obrazka. "
+        "Umieść podpisy pod grafikami. Zwrócony kod powinien zawierać wyłącznie zawartość do wstawienia "
+        "pomiędzy tagami <body> i </body>. Oto treść artykułu: " + file_content
+    )
 
-html_content = response.choices[0].message["content"]
+    html_content = get_html_from_openai(prompt)
 
-with open("artykul.html", "w", encoding="utf-8") as html_file:
-    html_file.write(html_content)
+    write_file("artykul.html", html_content)
 
-print("article completed")
+    template_html = generate_template_html()
+    write_file("szablon.html", template_html)
 
-template_html = '''
+    full_preview_html = template_html.replace("<!-- article content -->", html_content)
+    write_file("podglad.html", full_preview_html)
+
+    print("Article, template, and preview generation completed.")
+
+
+def read_file(filename):
+    try:
+        with open(filename, "r", encoding="utf-8") as file:
+            return file.read()
+    except FileNotFoundError:
+        raise FileNotFoundError(f"File '{filename}' not found.")
+
+
+def write_file(filename, content):
+    with open(filename, "w", encoding="utf-8") as file:
+        file.write(content)
+
+
+def get_html_from_openai(prompt):
+    response = openai.ChatCompletion.create(
+        model="gpt-4o",
+        messages=[
+            {
+                "role": "system",
+                "content": "You are a helpful assistant that generates raw HTML code without markdown or other formatting markers."
+            },
+            {"role": "user", "content": prompt}
+        ],
+        temperature=0.7,
+        max_tokens=1500,
+    )
+    return response.choices[0].message["content"]
+
+
+def generate_template_html():
+    return '''
 <!DOCTYPE html>
 <html lang="pl">
 <head>
@@ -72,12 +101,6 @@ template_html = '''
 </html>
 '''
 
-with open("szablon.html", "w", encoding="utf-8") as template_file:
-    template_file.write(template_html)
 
-full_preview_html = template_html.replace("<!-- article content -->", html_content)
-
-with open("podglad.html", "w", encoding="utf-8") as preview_file:
-    preview_file.write(full_preview_html)
-
-print("template and view completed")
+if __name__ == "__main__":
+    main()
