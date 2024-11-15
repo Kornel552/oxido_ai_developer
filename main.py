@@ -34,3 +34,50 @@ with open("artykul.html", "w", encoding="utf-8") as html_file:
 
 print("article completed")
 
+template_html = '''
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Podgląd Artykułu</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 20px auto;
+        }
+        figure {
+            text-align: center;
+            margin: 20px 0;
+        }
+        figcaption {
+            font-style: italic;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <!-- article content -->
+</body>
+</html>
+'''
+
+with open("szablon.html", "w", encoding="utf-8") as template_file:
+    template_file.write(template_html)
+
+full_preview_html = template_html.replace("<!-- article content -->", html_content)
+
+with open("podglad.html", "w", encoding="utf-8") as preview_file:
+    preview_file.write(full_preview_html)
+
+print("template and view completed")
